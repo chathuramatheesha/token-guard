@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Poetry virtual environments (if inside project)
+.poetry/
+.env
+.venv/
+venv/
+
+# SQLite database files
+*.sqlite3
+*.db
+*.sqlite
+
+# VS Code settings
+.vscode/
+
+# Logs and caches
+*.log
+*.cache
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Python environment variables
+.env
+
+# macOS system files
+.DS_Store
+
+# Pytest cache
+.pytest_cache/
+
+# mypy cache
+.mypy_cache/
+
+# Pycharm project files
+.idea/
+
+# Docker files if generated locally
+*.env
+docker-compose.override.yml
