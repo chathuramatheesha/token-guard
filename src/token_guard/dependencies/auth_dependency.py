@@ -2,20 +2,24 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from token_guard.core import Argon2Hasher
-from token_guard.dependencies.db_dependeny import SessionDep
-from token_guard.repositories import UserRepository
-from token_guard.services.auth_service import AuthService
-from token_guard.services.user_service import UserService
+from token_guard.dependencies.hash_dependency import Argon2HasherDep
+from token_guard.dependencies.jwt_dependency import JWTServiceDep
+from token_guard.dependencies.refresh_token_dependency import RefreshTokenServiceDep
+from token_guard.dependencies.user_dependency import UserServiceDep
+from token_guard.services import AuthService
 
 
-async def _get_auth_service(db: SessionDep) -> AuthService:
-    user_service = UserService(
-        user_repo=UserRepository(db),
-        password_hasher=Argon2Hasher(),
-    )
+async def _get_auth_service(
+    user_service: UserServiceDep,
+    jwt_service: JWTServiceDep,
+    refresh_token_service: RefreshTokenServiceDep,
+    password_hasher: Argon2HasherDep,
+) -> AuthService:
     auth_service = AuthService(
         user_service=user_service,
+        jwt_service=jwt_service,
+        refresh_token_service=refresh_token_service,
+        hasher=password_hasher,
     )
     return auth_service
 

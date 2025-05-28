@@ -16,7 +16,6 @@ class User(Base):
     )
     fullname: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(254), nullable=False, index=True)
-    nickname: Mapped[str] = mapped_column(String(50), nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(110), nullable=False)
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole),

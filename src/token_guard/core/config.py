@@ -7,6 +7,8 @@ class BaseConfig(BaseSettings):
     APP_LINK: str | None = None
 
     SECRET_KEY: str | None = None
+    SECRET_REFRESH_TOKEN: str | None = None
+    SECRET_ACCESS_TOKEN: str | None = None
     SECURITY_PASSWORD_SALT: str | None = None
     ALGORITHM: str | None = None
 

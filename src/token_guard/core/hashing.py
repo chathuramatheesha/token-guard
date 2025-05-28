@@ -23,17 +23,17 @@ class Argon2Hasher:
             type=type_,
         )
 
-    def hash_password(self, password: str) -> str:
-        if not password or not isinstance(password, str):
-            raise user_exceptions.password_hashing_exception
+    def hash(self, value: str) -> str:
+        if not value or not isinstance(value, str):
+            raise user_exceptions.user_password_hashing_exception
 
-        return self._hasher.hash(password)
+        return self._hasher.hash(value)
 
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+    def verify_password(self, plain: str, hashed: str) -> bool:
         try:
-            return self._hasher.verify(hashed_password, plain_password)
+            return self._hasher.verify(hashed, plain)
         except (VerifyMismatchError, VerificationError, InvalidHash):
             return False
 
-    def needs_rehash(self, hashed_password: str) -> bool:
-        return self._hasher.check_needs_rehash(hashed_password)
+    def needs_rehash(self, hashed: str) -> bool:
+        return self._hasher.check_needs_rehash(hashed)

@@ -4,7 +4,7 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from token_guard.models import User
-from token_guard.schemas.user_schemas import UserCreate, UserUpdate
+from token_guard.schemas import UserCreate, UserUpdateRequest
 
 
 class UserRepository:
@@ -27,7 +27,7 @@ class UserRepository:
         await self._db.commit()
         return inserted_user
 
-    async def update_user(self, user_id: str, user_update: UserUpdate) -> User:
+    async def update_user(self, user_id: str, user_update: UserUpdateRequest) -> User:
         stmt = (
             update(User)
             .where(User.id == user_id)
