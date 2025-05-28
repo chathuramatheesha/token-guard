@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 from sqlalchemy import String, Boolean, DateTime, Enum
 from sqlalchemy.orm import Mapped, mapped_column
-from ulid import ULID
 
 from token_guard.constants.db_constants import USER_TABLENAME
 from token_guard.db import Base
@@ -12,7 +11,7 @@ from token_guard.enums import UserRole
 class User(Base):
     __tablename__ = USER_TABLENAME
 
-    id: Mapped[ULID] = mapped_column(
+    id: Mapped[str] = mapped_column(
         String(26), nullable=False, primary_key=True, index=True
     )
     fullname: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
@@ -32,3 +31,6 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )

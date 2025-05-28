@@ -2,7 +2,6 @@ from typing import Sequence
 
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from ulid import ULID
 
 from token_guard.models import User
 from token_guard.schemas.user_schemas import UserCreate, UserUpdate
@@ -12,7 +11,7 @@ class UserRepository:
     def __init__(self, db: AsyncSession) -> None:
         self._db = db
 
-    async def get_by_id(self, user_id: ULID) -> User | None:
+    async def get_by_id(self, user_id: str) -> User | None:
         stmt = select(User).where(User.id == user_id)
         user = await self._db.scalar(stmt)
         return user
@@ -25,9 +24,10 @@ class UserRepository:
     async def create_user(self, user_create: UserCreate) -> User:
         stmt = insert(User).values(**user_create.model_dump()).returning(User)
         inserted_user = await self._db.scalar(stmt)
+        await self._db.commit()
         return inserted_user
 
-    async def update_user(self, user_id: ULID, user_update: UserUpdate) -> User:
+    async def update_user(self, user_id: str, user_update: UserUpdate) -> User:
         stmt = (
             update(User)
             .where(User.id == user_id)
@@ -35,14 +35,16 @@ class UserRepository:
             .returning(User)
         )
         updated_user = await self._db.scalar(stmt)
+        await self._db.commit()
         return updated_user
 
-    async def delete_user(self, user_id: ULID) -> None:
+    async def delete_user(self, user_id: str) -> None:
         stmt = delete(User).where(User.id == user_id)
         await self._db.execute(stmt)
+        await self._db.commit()
         return
 
-    async def deactivate_user(self, user_id: ULID) -> User:
+    async def deactivate_user(self, user_id: str) -> User:
         stmt = (
             update(User)
             .where(User.id == user_id)
@@ -50,9 +52,10 @@ class UserRepository:
             .returning(User)
         )
         deactivated_user = await self._db.scalar(stmt)
+        await self._db.commit()
         return deactivated_user
 
-    async def set_password(self, user_id: ULID, hashed_password: str) -> User:
+    async def set_password(self, user_id: str, hashed_password: str) -> User:
         stmt = (
             update(User)
             .where(User.id == user_id)
@@ -60,9 +63,10 @@ class UserRepository:
             .returning(User)
         )
         updated_user = await self._db.scalar(stmt)
+        await self._db.commit()
         return updated_user
 
-    async def verify_email(self, user_id: ULID) -> User:
+    async def verify_email(self, user_id: str) -> User:
         stmt = (
             update(User)
             .where(User.id == user_id)
@@ -70,6 +74,7 @@ class UserRepository:
             .returning(User)
         )
         verified_user = await self._db.scalar(stmt)
+        await self._db.commit()
         return verified_user
 
     async def list_user(self) -> Sequence[User]:
