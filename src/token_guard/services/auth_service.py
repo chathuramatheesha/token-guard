@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 
-from fastapi.requests import Request
+from fastapi import Request, BackgroundTasks
 
-from token_guard.core import Argon2Hasher
+from token_guard.core import Argon2Hasher, config
+from token_guard.enums import TokenType
 from token_guard.exceptions import auth_exceptions as exceptions
 from token_guard.schemas import (
     UserPublicResponse,
@@ -11,7 +12,9 @@ from token_guard.schemas import (
     AuthTokens,
     UserUpdateRequest,
     RefreshTokenSave,
+    EmailSendDTO,
 )
+from token_guard.services.email_service import EmailService
 from token_guard.services.jwt_service import JWTService
 from token_guard.services.refresh_token_service import RefreshTokenService
 from token_guard.services.user_service import UserService
@@ -23,17 +26,14 @@ class AuthService:
         user_service: UserService,
         jwt_service: JWTService,
         refresh_token_service: RefreshTokenService,
+        email_service: EmailService,
         hasher: Argon2Hasher,
     ) -> None:
         self._user_service = user_service
         self._jwt_service = jwt_service
         self._refresh_token_service = refresh_token_service
+        self._email_service = email_service
         self._hasher = hasher
-
-    async def register_user(
-        self, user_create_request: UserCreateRequest
-    ) -> UserPublicResponse:
-        return await self._user_service.create_user(user_create_request)
 
     async def update_last_login(self, user_id: str) -> None:
         await self._user_service.update_user(
@@ -44,8 +44,36 @@ class AuthService:
         )
         return
 
+    async def register_user(
+        self,
+        user_create_request: UserCreateRequest,
+        background_task: BackgroundTasks,
+    ) -> UserPublicResponse:
+        registered_user = await self._user_service.create_user(user_create_request)
+        email_verification_token = self._jwt_service.encode_token(
+            registered_user.id,
+            TokenType.EMAIL_VERIFICATION_TOKEN,
+            type=TokenType.EMAIL_VERIFICATION_TOKEN,
+        )
+
+        send_email_dto = EmailSendDTO(
+            email_from=config.GMAIL_USERNAME,
+            email_to=registered_user.email,
+            subject=f"Email Verification ({config.APP_NAME})",
+            content=f"Click the link to verify your email: {config.APP_LINK}/api/v1/auth/verify-email?token={email_verification_token}",
+        )
+
+        background_task.add_task(
+            self._email_service.send_verification_email,
+            send_email_dto,
+        )
+
+        return UserPublicResponse.model_validate(registered_user)
+
     async def login(
-        self, request: Request, user_login_request: AuthLoginRequest
+        self,
+        request: Request,
+        user_login_request: AuthLoginRequest,
     ) -> AuthTokens:
         user = await self._user_service.get_user_by_email(str(user_login_request.email))
 
@@ -55,9 +83,17 @@ class AuthService:
             raise exceptions.auth_invalid_credentials_exception
 
         user_ip_address = request.client.host
-        access_token = self._jwt_service.create_access_token(user.id)
-        refresh_token = self._jwt_service.create_refresh_token(user.id, user_ip_address)
-        refresh_token_data = self._jwt_service.decode_refresh_token(refresh_token)
+        access_token = self._jwt_service.encode_token(user.id, TokenType.ACCESS_TOKEN)
+        refresh_token = self._jwt_service.encode_token(
+            user.id,
+            TokenType.REFRESH_TOKEN,
+            ip=user_ip_address,
+            type=TokenType.REFRESH_TOKEN.value,
+        )
+        refresh_token_data = self._jwt_service.decode_token(
+            refresh_token,
+            token_type=TokenType.REFRESH_TOKEN,
+        )
 
         await self._refresh_token_service.save_refresh_token(
             RefreshTokenSave(

@@ -13,8 +13,15 @@ AUTH_INVALID_CREDENTIALS = "Invalid email or password."
 JWT_CREDENTIALS_INVALID = "Could not validate credentials."
 JWT_TOKEN_EXPIRED = "Token expired."
 JWT_TOKEN_INVALID = "Token invalid."
+JWT_INVALID_TOKEN_TYPE = "Token type invalid."
 
 # TOKEN ERROR MESSAGES
 TOKEN_REFRESH_SAVE_FAILED_ERROR = (
     "Failed to store refresh token. Please try again later."
+)
+
+# COMMON ERROR MESSAGES
+DATACLASS_INVALID_ERROR = "{} must be a dataclass"
+EMAIL_MISSING_FIELDS_ERROR = (
+    "Missing one or more required email fields: subject, from, to, content"
 )

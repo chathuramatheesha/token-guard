@@ -8,7 +8,6 @@ from token_guard.exceptions import user_exceptions as exceptions
 from token_guard.models import User
 from token_guard.repositories import UserRepository
 from token_guard.schemas import UserCreate, UserCreateRequest, UserUpdateRequest
-from token_guard.schemas import UserPublicResponse
 
 
 class UserService:
@@ -16,9 +15,7 @@ class UserService:
         self._repo = user_repo
         self._hasher = hasher
 
-    async def create_user(
-        self, user_create_request: UserCreateRequest
-    ) -> UserPublicResponse:
+    async def create_user(self, user_create_request: UserCreateRequest) -> User:
         email_exists = await self._repo.get_by_email(str(user_create_request.email))
 
         if email_exists:
@@ -37,7 +34,7 @@ class UserService:
         if not created_user:
             raise exceptions.user_creation_failed_exception
 
-        return UserPublicResponse.model_validate(created_user)
+        return created_user
 
     async def get_user_by_id(self, user_id: str) -> User:
         user = await self._repo.get_by_id(user_id)

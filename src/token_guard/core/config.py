@@ -13,6 +13,7 @@ class BaseConfig(BaseSettings):
     ALGORITHM: str | None = None
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10
+    EMAIL_VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 10
     REFRESH_TOKEN_EXPIRE_DAYS: int = 3
 
     DATABASE_URL: str | None = None

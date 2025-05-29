@@ -22,3 +22,8 @@ jwt_token_invalid_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail=error_constants.JWT_TOKEN_INVALID,
 )
+
+jwt_token_invalid_type_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail=error_constants.JWT_INVALID_TOKEN_TYPE,
+)

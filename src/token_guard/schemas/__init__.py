@@ -3,6 +3,8 @@ from .token_schemas import (
     AccessTokenDTO,
     RefreshTokenDTO,
     RefreshTokenSave,
+    EmailSendDTO,
+    EmailVerificationTokenDTO,
 )
 from .user_schemas import (
     UserCreate,

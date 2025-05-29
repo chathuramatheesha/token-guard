@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Request, Response
+from fastapi import APIRouter, status, Request, Response, BackgroundTasks
 
 from token_guard.dependencies import AuthServiceDep
 from token_guard.enums import TokenType
@@ -21,8 +21,9 @@ router = APIRouter()
 async def register(
     user_create_request: UserCreateRequest,
     service: AuthServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> UserPublicResponse:
-    return await service.register_user(user_create_request)
+    return await service.register_user(user_create_request, background_tasks)
 
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=AuthLoginResponse)
